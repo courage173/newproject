@@ -1,15 +1,20 @@
-from flask import Flask,render_template,request,session,logging,url_for,redirect,flash
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session,sessionmaker
-
+from flask import Flask, render_template, request, session, url_for, redirect, flash
+from flask_mysqldb import MySQL
 from passlib.hash import sha256_crypt
+from sqlalchemy import create_engine
+
+
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 
 engine = create_engine("mysql+pymysql://root:pedro123@localhost/register")
 db = scoped_session(sessionmaker(bind=engine))
 
+
 app = Flask(__name__)
 @app.route('/')
 def home():
+
     return render_template("home.html")
 
 #register form
@@ -17,7 +22,13 @@ def home():
 def register():
     if request.method == "POST":
         name = request.form.get("name")
+
         username = request.form.get("username")
+        faculty = request.form.get("faculty")
+        department = request.form.get("department")
+        project_supervisor = request.form.get("projectsupervisor")
+        date_of_birth = request.form.get("date_of_birth")
+
         password = request.form.get("password")
         confirm = request.form.get("confirm")
         secure_password = sha256_crypt.encrypt(str(password))
@@ -26,7 +37,13 @@ def register():
             db.execute("INSERT INTO users(name, username,password) VALUES(:name,:username,:password)",
                        {"name":name,"username":username,"password":secure_password})
             db.commit()
-            flash("you are registered and can log in","success")
+            db.execute("INSERT INTO profile(department, faculty,project_supervisor,date_of_birth) VALUES(:department,:faculty,:project_supervisor,:date_of_birth)",
+                       {"department": department, "faculty": faculty, "project_supervisor": project_supervisor,"date_of_birth": date_of_birth})
+            db.commit()
+            flash("you are registered and can log in", "success")
+            return redirect(url_for('login'))
+            flash("you are registered and can log in{register.username.data}","success")
+
             return redirect(url_for('login'))
         else:
             flash("password does not match","danger")
@@ -53,8 +70,8 @@ def login():
                 if sha256_crypt.verify(password,passwor_data):
                     session["log"] = True
 
-                    flash("you are now logged in","success")
-                    return render_template('profile.html')
+
+                    return redirect(url_for('profile'))
                 else:
                     flash("incorrect password","danger")
                     return render_template('login.html')
@@ -62,11 +79,21 @@ def login():
 
 
     return render_template("login.html")
-@app.route('/profile')
+@app.route('/profile', methods=["POST", "GET"])
 def profile():
+
+
+
+    userdata = db.execute("SELECT * FROM users").fetchone()
+
+
+
     flash("You have been logged in","success")
 
-    return render_template('profile.html')
+
+
+
+    return render_template('profile.html',user = userdata)
 @app.route('/logout')
 def logout():
     session.clear()
