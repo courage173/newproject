@@ -30,7 +30,10 @@ def register():
     if request.method == "POST":
         name = request.form.get("name")
 
+
         username = request.form.get("username")
+
+
         faculty = request.form.get("faculty")
         department = request.form.get("department")
         project_supervisor = request.form.get("projectsupervisor")
@@ -62,18 +65,26 @@ def register():
 
 @app.route('/login', methods=["POST","GET"])
 def login():
+
+
+
     if request.method == "POST":
 
-        username = request.form.get("name")
-        appname = username
 
-        password = request.form.get("password")
+        username = request.form.get("name")
+        global appname
+        appname =  request.form.get("name")
         print(appname)
+        password = request.form.get("password")
+
+
 
 
         usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": username}).fetchone()
         passwordata = db.execute("SELECT password FROM users WHERE username=:username",{"username": username}).fetchone()
-        print(usernamedata)
+
+
+
 
         if usernamedata is None:
             flash("No username","danger")
@@ -85,6 +96,8 @@ def login():
                     appname = username
 
 
+
+
                     return redirect(url_for('profile'))
                 else:
                     flash("incorrect password","danger")
@@ -93,29 +106,29 @@ def login():
 
 
     return render_template("login.html")
+
+
+
+
+
 @app.route('/profile', methods=["POST", "GET"])
 def profile():
-
-
-
-
-
-
-    appname = request.form.get("name")
-
+    print(appname)
 
     usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": appname}).fetchone()
-    print(appname)
+
 
 
 
     return render_template('profile.html',user = usernamedata)
+
 @app.route('/logout')
 def logout():
     session.clear()
     flash("you have been logged out!","success")
 
     return redirect(url_for('login'))
+print(appname)
 
 if __name__ == "__main__":
     app.secret_key = "1234567dailyweb"
