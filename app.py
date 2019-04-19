@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, session, url_for, redirect, flash
 from flask_mysqldb import MySQL
+import sqlalchemy as db
 from passlib.hash import sha256_crypt
 from sqlalchemy import create_engine
+
+
+
 
 
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -11,7 +15,9 @@ engine = create_engine("mysql+pymysql://root:pedro123@localhost/register")
 db = scoped_session(sessionmaker(bind=engine))
 
 
+
 app = Flask(__name__)
+
 @app.route('/')
 def home():
 
@@ -59,8 +65,10 @@ def login():
         username = request.form.get("name")
         password = request.form.get("password")
 
+
         usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": username}).fetchone()
         passwordata = db.execute("SELECT password FROM users WHERE username=:username",{"username": username}).fetchone()
+        print(usernamedata)
 
         if usernamedata is None:
             flash("No username","danger")
@@ -81,19 +89,20 @@ def login():
     return render_template("login.html")
 @app.route('/profile', methods=["POST", "GET"])
 def profile():
+    request.form(login)
+
+    if request.method == "POST":
 
 
 
-    userdata = db.execute("SELECT * FROM users").fetchone()
+        username = request.form.get("name")
+
+
+        usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": username}).fetchone()
 
 
 
-    flash("You have been logged in","success")
-
-
-
-
-    return render_template('profile.html',user = userdata)
+    return render_template('profile.html',user = usernamedata)
 @app.route('/logout')
 def logout():
     session.clear()
