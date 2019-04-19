@@ -13,6 +13,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 engine = create_engine("mysql+pymysql://root:pedro123@localhost/register")
 db = scoped_session(sessionmaker(bind=engine))
+appname = ""
 
 
 
@@ -62,8 +63,12 @@ def register():
 @app.route('/login', methods=["POST","GET"])
 def login():
     if request.method == "POST":
+
         username = request.form.get("name")
+        appname = username
+
         password = request.form.get("password")
+        print(appname)
 
 
         usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": username}).fetchone()
@@ -77,6 +82,7 @@ def login():
             for passwor_data in passwordata:
                 if sha256_crypt.verify(password,passwor_data):
                     session["log"] = True
+                    appname = username
 
 
                     return redirect(url_for('profile'))
@@ -89,16 +95,17 @@ def login():
     return render_template("login.html")
 @app.route('/profile', methods=["POST", "GET"])
 def profile():
-    request.form(login)
-
-    if request.method == "POST":
 
 
 
-        username = request.form.get("name")
 
 
-        usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": username}).fetchone()
+
+    appname = request.form.get("name")
+
+
+    usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": appname}).fetchone()
+    print(appname)
 
 
 
