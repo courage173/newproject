@@ -64,21 +64,15 @@ def register():
     return render_template("register.html")
 
 @app.route('/login', methods=["POST","GET"])
+
+#login form
 def login():
-
-
-
     if request.method == "POST":
-
-
         username = request.form.get("name")
         global appname
         appname =  request.form.get("name")
-        print(appname)
+
         password = request.form.get("password")
-
-
-
 
         usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": username}).fetchone()
         passwordata = db.execute("SELECT password FROM users WHERE username=:username",{"username": username}).fetchone()
@@ -112,17 +106,19 @@ def login():
 
 
 @app.route('/profile', methods=["POST", "GET"])
+
+#user profile
 def profile():
-    print(appname)
-
     usernamedata = db.execute("SELECT username FROM users WHERE username=:username",{"username": appname}).fetchone()
-
-
+    user = db.execute("select profile.project_supervisor FROM profile, users WHERE profile.id=users.id",{"username":appname}).fetchone()
+    print(user)
 
 
     return render_template('profile.html',user = usernamedata)
 
 @app.route('/logout')
+
+#logout
 def logout():
     session.clear()
     flash("you have been logged out!","success")
